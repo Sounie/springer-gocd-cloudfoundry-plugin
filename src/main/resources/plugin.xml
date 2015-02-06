@@ -15,10 +15,10 @@
  * limitations under the License.
  *************************GO-LICENSE-END******************************* -->
 
-<go-plugin id="com.springer.cloudfoundry.plugin" version="1">
+<go-plugin id="CloudFoundry" version="1">
     <about>
-        <name>Springer CloudFoundry Plugin</name>
-        <version>1.0</version>
+        <name>Springer Cloud Foundry Plugin</name>
+        <version>1.0.0</version>
         <target-go-version>14.4.0</target-go-version>
         <description>
             Task plugin that supports configuration and execution of CloudFoundry tasks in Go
