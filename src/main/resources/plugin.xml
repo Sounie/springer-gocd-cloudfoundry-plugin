@@ -15,7 +15,7 @@
  * limitations under the License.
  *************************GO-LICENSE-END******************************* -->
 
-<go-plugin id="curl.task.plugin" version="1">
+<go-plugin id="com.springer.cloudfoundry.plugin" version="1">
     <about>
         <name>Springer CloudFoundry Plugin</name>
         <version>1.0</version>
