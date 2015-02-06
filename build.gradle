@@ -19,7 +19,7 @@ dependencies {
 
     compile 'org.cloudfoundry:cloudfoundry-client-lib:1.1.0'
 
-    testCompile 'junit:junit4.11'
+    testCompile 'junit:junit:4.11'
 }
 
 jar {
