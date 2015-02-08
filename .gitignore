@@ -10,4 +10,5 @@
 
 build
 .gradle
+.idea
 idea/
