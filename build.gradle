@@ -6,7 +6,7 @@ targetCompatibility = 1.6
 version = '1.0'
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.3-rc-2'
+  gradleVersion = '2.3-rc-3'
 }
 
 repositories {
