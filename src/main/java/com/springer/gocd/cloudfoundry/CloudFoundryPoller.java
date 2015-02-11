@@ -8,15 +8,14 @@ import com.thoughtworks.go.plugin.api.material.packagerepository.RepositoryConfi
 import com.thoughtworks.go.plugin.api.response.Result;
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
+import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.InstanceInfo;
+import org.cloudfoundry.client.lib.domain.InstanceState;
 import org.cloudfoundry.client.lib.domain.InstancesInfo;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class CloudFoundryPoller implements PackageMaterialPoller {
     private static final Logger LOGGER = Logger.getLoggerFor(CloudFoundryPoller.class);
@@ -27,34 +26,69 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
 
         client.login();
 
-        // TODO - find latest version
-        client.getApplication(packageConfiguration.get("appName").getValue());
-        final String appName = "oscar-journal-dev-0_81";
+        final String appNamePrefix = packageConfiguration.get("appName").getValue();
 
         LOGGER.info("getLatestRevision called");
 
-        InstancesInfo applicationInstances = client.getApplicationInstances(appName);
+        List<String> appNames = lookupAppNames(client, appNamePrefix);
 
-        List<Date> dates = new ArrayList<Date>();
-        if (applicationInstances != null) {
-            for (InstanceInfo instance : applicationInstances.getInstances()) {
-LOGGER.info("instance: " + instance);
-                dates.add(instance.getSince());
+        List<AppInstanceDetails> instances = new ArrayList<AppInstanceDetails>();
+        for (String appName : appNames) {
+            InstancesInfo applicationInstances = client.getApplicationInstances(appName);
+
+            if (applicationInstances != null) {
+                for (InstanceInfo instance : applicationInstances.getInstances()) {
+                    if (instance.getState().equals(InstanceState.RUNNING)) {
+                        LOGGER.info("instance: " + instance);
+                        // Assuming app name has version suffix
+                        instances.add(
+                                new AppInstanceDetails(
+                                    appName,
+                                    instance.getSince(),
+                                    appName.replace(appNamePrefix, "").replaceAll("\\D", "")
+                                )
+                        );
+                    }
+                }
             }
         }
-        dates.sort(new Comparator<Date>() {
+
+        Collections.sort(instances, new Comparator<AppInstanceDetails>() {
             @Override
-            public int compare(Date date1, Date date2) {
-                return date1.compareTo(date2);
+            public int compare(AppInstanceDetails i1, AppInstanceDetails i2) {
+                return i1.getSince().compareTo(i2.getSince());
             }
         });
 
-        // FIXME: handling when no dates
-        return new PackageRevision("fake revision", dates.iterator().next(), "fake user");
+        if (instances.size() > 0) {
+            AppInstanceDetails instanceInfo = instances.iterator().next();
+
+            // FIXME: handling when no dates
+            return new PackageRevision(instanceInfo.getRevision(), instanceInfo.getSince(), "");
+        } else {
+            // TODO: what is a suitable fallback?
+            return new PackageRevision("None found", new Date(), "");
+        }
+    }
+
+    private List<String> lookupAppNames(CloudFoundryClient client, String appName) {
+        List<CloudApplication> applications = client.getApplications();
+
+        // Assuming apps are deployed with the app name having a version appended
+        List<String> matchingApps = new ArrayList<String>();
+        for (CloudApplication application : applications) {
+            if (application.getName().startsWith(appName)) {
+                matchingApps.add(application.getName());
+            }
+        }
+
+        return matchingApps;
     }
 
     @Override
-    public PackageRevision latestModificationSince(PackageConfiguration packageConfiguration, RepositoryConfiguration repositoryConfiguration, PackageRevision previouslyKnownRevision) {
+    public PackageRevision latestModificationSince(PackageConfiguration packageConfiguration,
+                                                   RepositoryConfiguration repositoryConfiguration,
+                                                   PackageRevision previouslyKnownRevision) {
         LOGGER.info("latestModificationSince called");
         return new PackageRevision("fake revision", new Date(), "fake user");
     }
