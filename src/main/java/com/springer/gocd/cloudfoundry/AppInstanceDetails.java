@@ -10,7 +10,7 @@ public class AppInstanceDetails {
 
     public AppInstanceDetails(String appName, Date since, String revision) {
         this.appName = appName;
-        this.since = since;
+        this.since = new Date(since.getTime());
         this.revision = revision;
     }
 
