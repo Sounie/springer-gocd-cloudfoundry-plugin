@@ -1,16 +1,24 @@
 apply plugin: 'java'
 apply plugin: 'idea'
+apply plugin: 'docker'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 version = '1.0'
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.3-rc-4'
+  gradleVersion = '2.3'
 }
 
 repositories {
     mavenCentral()
+}
+
+buildscript {
+    repositories { mavenCentral() }
+    dependencies {
+        classpath 'se.transmode.gradle:gradle-docker:1.2'
+    }
 }
 
 dependencies {
@@ -30,3 +38,5 @@ jar {
         from configurations.runtime
     }
 }
+
+
