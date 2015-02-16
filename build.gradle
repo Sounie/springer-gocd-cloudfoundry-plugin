@@ -4,7 +4,7 @@ apply plugin: 'docker'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
-version = '1.0'
+version = '1.0.0'
 
 task wrapper(type: Wrapper) {
   gradleVersion = '2.3'

@@ -12,6 +12,7 @@ import org.cloudfoundry.client.lib.domain.CloudApplication;
 import org.cloudfoundry.client.lib.domain.InstanceInfo;
 import org.cloudfoundry.client.lib.domain.InstanceState;
 import org.cloudfoundry.client.lib.domain.InstancesInfo;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -71,20 +72,6 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
         }
     }
 
-    private List<String> lookupAppNames(CloudFoundryClient client, String appName) {
-        List<CloudApplication> applications = client.getApplications();
-
-        // Assuming apps are deployed with the app name having a version appended
-        List<String> matchingApps = new ArrayList<String>();
-        for (CloudApplication application : applications) {
-            if (application.getName().startsWith(appName)) {
-                matchingApps.add(application.getName());
-            }
-        }
-
-        return matchingApps;
-    }
-
     @Override
     public PackageRevision latestModificationSince(PackageConfiguration packageConfiguration,
                                                    RepositoryConfiguration repositoryConfiguration,
@@ -96,13 +83,42 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
     @Override
     public Result checkConnectionToRepository(RepositoryConfiguration repositoryConfiguration) {
         LOGGER.info("checkConnectionToRepository called");
-        return new Result();
+
+        CloudFoundryClient client = getClient(repositoryConfiguration);
+
+        Result result = new Result();
+
+        OAuth2AccessToken login = client.login();
+        client.logout();
+        if (login == null || login.getExpiration().before(new Date())) {
+            return result.withErrorMessages("Invalid login");
+        }
+
+        return result;
     }
 
     @Override
     public Result checkConnectionToPackage(PackageConfiguration packageConfiguration, RepositoryConfiguration repositoryConfiguration) {
-        LOGGER.info("checkConnectionToPackage called");
-        return new Result();
+        CloudFoundryClient client = getClient(repositoryConfiguration);
+
+        Result result = new Result();
+
+        OAuth2AccessToken login = client.login();
+
+        if (login == null || login.getExpiration().before(new Date())) {
+            LOGGER.warn("Invalid login");
+            result = result.withErrorMessages("Invalid login");
+        } else {
+            final String appNamePrefix = packageConfiguration.get("appName").getValue();
+            if (lookupAppNames(client, appNamePrefix).isEmpty()) {
+                LOGGER.warn("No app found");
+                result = result.withErrorMessages("No such app found in CloudFoundry.");
+            }
+        }
+
+        client.logout();
+
+        return result;
     }
 
     private CloudFoundryClient getClient(RepositoryConfiguration repositoryConfiguration) {
@@ -115,5 +131,19 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
         } catch (MalformedURLException e) {
             throw new RuntimeException("Invalid api URL", e);
         }
+    }
+
+    private List<String> lookupAppNames(CloudFoundryClient client, String appName) {
+        List<CloudApplication> applications = client.getApplications();
+
+        // Assuming apps are deployed with the app name having a version appended
+        List<String> matchingApps = new ArrayList<String>();
+        for (CloudApplication application : applications) {
+            if (application.getName().startsWith(appName)) {
+                matchingApps.add(application.getName());
+            }
+        }
+
+        return matchingApps;
     }
 }

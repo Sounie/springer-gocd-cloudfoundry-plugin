@@ -6,6 +6,7 @@ import com.thoughtworks.go.plugin.api.material.packagerepository.PackageConfigur
 import com.thoughtworks.go.plugin.api.material.packagerepository.PackageMaterialConfiguration;
 import com.thoughtworks.go.plugin.api.material.packagerepository.PackageMaterialProperty;
 import com.thoughtworks.go.plugin.api.material.packagerepository.RepositoryConfiguration;
+
 import com.thoughtworks.go.plugin.api.response.validation.ValidationResult;
 
 import static com.thoughtworks.go.plugin.api.config.Property.*;
@@ -32,11 +33,10 @@ public class CloudFoundryConfig implements PackageMaterialConfiguration {
 
     public static final Property space = new PackageMaterialProperty("space")
             .with(DISPLAY_NAME, "Space");
-//    private final String space;
-//    private final String appName;
+
     public static final Property appName = new PackageMaterialProperty("appName")
         .with(DISPLAY_NAME, "App Name");
-//    private final String orgName;
+
     public static final Property orgName = new PackageMaterialProperty("orgName")
         .with(DISPLAY_NAME, "Organisation Name");
 
@@ -66,9 +66,13 @@ public class CloudFoundryConfig implements PackageMaterialConfiguration {
 
     @Override
     public ValidationResult isRepositoryConfigurationValid(RepositoryConfiguration repositoryConfiguration) {
-        LOGGER.info("isRepositoryConfigurationValid called");
-        // TODO: implement
-        return new ValidationResult();
+
+        // FIXME: - where is this invoked from?
+        LOGGER.debug("isRepositoryConfigurationValid called");
+
+        ValidationResult result = new ValidationResult();
+
+        return result;
     }
 
     @Override
