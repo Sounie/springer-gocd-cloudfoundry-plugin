@@ -1,5 +1,5 @@
 # springer-gocd-cloudfoundry-plugin
-Go plugin for Cloud Foundry
+Go plugin for monitoring app status in Cloud Foundry.
 
 Status: Partially-functional work in progress.
 
