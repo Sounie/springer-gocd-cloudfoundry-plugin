@@ -6,6 +6,7 @@ import com.thoughtworks.go.plugin.api.material.packagerepository.PackageMaterial
 import com.thoughtworks.go.plugin.api.material.packagerepository.PackageRevision;
 import com.thoughtworks.go.plugin.api.material.packagerepository.RepositoryConfiguration;
 import com.thoughtworks.go.plugin.api.response.Result;
+import com.thoughtworks.go.plugin.api.response.execution.ExecutionResult;
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
@@ -80,7 +81,14 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
                                                    PackageRevision previouslyKnownRevision) {
         LOGGER.info("latestModificationSince called with preview revision " + previouslyKnownRevision);
 
-        return getLatestRevision(packageConfiguration, repositoryConfiguration);
+        PackageRevision latestRevision = getLatestRevision(packageConfiguration, repositoryConfiguration);
+
+        if (latestRevision.getTimestamp().after(previouslyKnownRevision.getTimestamp())) {
+            return latestRevision;
+        } else {
+            return null;
+        }
+
     }
 
     @Override
@@ -89,15 +97,13 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
 
         CloudFoundryClient client = getClient(repositoryConfiguration);
 
-        Result result = new Result();
-
         OAuth2AccessToken login = client.login();
         client.logout();
         if (login == null || login.getExpiration().before(new Date())) {
-            return result.withErrorMessages("Invalid login");
+            return ExecutionResult.failure("Invalid login");
         }
 
-        return result;
+        return ExecutionResult.success("Connected with supplied credentials.");
     }
 
     @Override
@@ -110,12 +116,12 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
 
         if (login == null || login.getExpiration().before(new Date())) {
             LOGGER.warn("Invalid login");
-            result = result.withErrorMessages("Invalid login");
+            result = ExecutionResult.failure("Invalid login");
         } else {
             final String appNamePrefix = packageConfiguration.get("appName").getValue();
             if (lookupAppNames(client, appNamePrefix).isEmpty()) {
                 LOGGER.warn("No app found");
-                result = result.withErrorMessages("No such app found in CloudFoundry.");
+                result = ExecutionResult.failure("No such app found in CloudFoundry.");
             }
         }
 
