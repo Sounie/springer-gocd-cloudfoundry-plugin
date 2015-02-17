@@ -54,6 +54,8 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
             }
         }
 
+        client.logout();
+
         Collections.sort(instances, new Comparator<AppInstanceDetails>() {
             @Override
             public int compare(AppInstanceDetails i1, AppInstanceDetails i2) {
@@ -67,7 +69,7 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
             // FIXME: handling when no dates
             return new PackageRevision(instanceInfo.getRevision(), instanceInfo.getSince(), "");
         } else {
-            // TODO: what is a suitable fallback?
+            // TODO: what is suitable fallback?
             return new PackageRevision("None found", new Date(), "");
         }
     }
@@ -76,8 +78,9 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
     public PackageRevision latestModificationSince(PackageConfiguration packageConfiguration,
                                                    RepositoryConfiguration repositoryConfiguration,
                                                    PackageRevision previouslyKnownRevision) {
-        LOGGER.info("latestModificationSince called");
-        return new PackageRevision("fake revision", new Date(), "fake user");
+        LOGGER.info("latestModificationSince called with preview revision " + previouslyKnownRevision);
+
+        return getLatestRevision(packageConfiguration, repositoryConfiguration);
     }
 
     @Override
