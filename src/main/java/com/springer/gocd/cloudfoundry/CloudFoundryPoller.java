@@ -24,13 +24,13 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
 
     @Override
     public PackageRevision getLatestRevision(PackageConfiguration packageConfiguration, RepositoryConfiguration repositoryConfiguration) {
+        final String appNamePrefix = packageConfiguration.get("APP_NAME").getValue();
+
+        LOGGER.info("getLatestRevision called, app name " + appNamePrefix);
+
         CloudFoundryClient client = getClient(repositoryConfiguration);
 
         client.login();
-
-        final String appNamePrefix = packageConfiguration.get("appName").getValue();
-
-        LOGGER.info("getLatestRevision called");
 
         List<String> appNames = lookupAppNames(client, appNamePrefix);
 
@@ -79,16 +79,17 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
     public PackageRevision latestModificationSince(PackageConfiguration packageConfiguration,
                                                    RepositoryConfiguration repositoryConfiguration,
                                                    PackageRevision previouslyKnownRevision) {
-        LOGGER.info("latestModificationSince called with preview revision " + previouslyKnownRevision);
+        LOGGER.info("latestModificationSince called with previous revision " + previouslyKnownRevision);
 
         PackageRevision latestRevision = getLatestRevision(packageConfiguration, repositoryConfiguration);
+
+        LOGGER.info("latestRevision: " + latestRevision);
 
         if (latestRevision.getTimestamp().after(previouslyKnownRevision.getTimestamp())) {
             return latestRevision;
         } else {
             return null;
         }
-
     }
 
     @Override
@@ -118,7 +119,7 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
             LOGGER.warn("Invalid login");
             result = ExecutionResult.failure("Invalid login");
         } else {
-            final String appNamePrefix = packageConfiguration.get("appName").getValue();
+            final String appNamePrefix = packageConfiguration.get("APP_NAME").getValue();
             if (lookupAppNames(client, appNamePrefix).isEmpty()) {
                 LOGGER.warn("No app found");
                 result = ExecutionResult.failure("No such app found in CloudFoundry.");
@@ -134,6 +135,8 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
         String api = repositoryConfiguration.get("REPO_URL").getValue();
         String username = repositoryConfiguration.get("USERNAME").getValue();
         String password = repositoryConfiguration.get("PASSWORD").getValue();
+
+        LOGGER.debug("Cloud Foundry connection details: api: " + api + ", username " + username);
 
         try {
             return new CloudFoundryClient(new CloudCredentials(username, password), new URL(api));
