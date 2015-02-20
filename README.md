@@ -18,7 +18,7 @@ Verify that the plugin has successfully been installed by navigating to the Admi
 
 ## Usage
 There are two stages involved in making use of this Material:
-..* Admin / Package Repositories
-.... Add Package Repository - select Cloud Foundry as the type and provide the credentials for accessing your Cloud Foundry
-..* During pipeline creation, specify Package as Material type and select the repository that you created in the previous step
-.... Select Define New and provide the details of your app.
+  * Admin / Package Repositories
+     Add Package Repository - select Cloud Foundry as the type and provide the credentials for accessing your Cloud Foundry
+  * During pipeline creation, specify Package as Material type and select the repository that you created in the previous step
+     Select Define New and provide the details of your app.
