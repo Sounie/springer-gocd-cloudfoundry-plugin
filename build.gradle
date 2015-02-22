@@ -1,10 +1,9 @@
 apply plugin: 'java'
 apply plugin: 'idea'
-apply plugin: 'docker'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
-version = '1.0.1'
+version = '1.0.2'
 
 task wrapper(type: Wrapper) {
   gradleVersion = '2.3'

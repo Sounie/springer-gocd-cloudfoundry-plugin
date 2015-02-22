@@ -22,3 +22,12 @@ There are two stages involved in making use of this Material:
      Add Package Repository - select Cloud Foundry as the type and provide the credentials for accessing your Cloud Foundry
   * During pipeline creation, specify Package as Material type and select the repository that you created in the previous step
      Select Define New and provide the details of your app.
+
+## Version History
+1.0.0
+18 February 2015
+Original release.
+
+1.0.1
+22 February 2015
+Password property 'secure'.
