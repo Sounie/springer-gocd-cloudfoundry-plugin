@@ -12,6 +12,9 @@ import com.thoughtworks.go.plugin.api.response.validation.ValidationResult;
 import static com.thoughtworks.go.plugin.api.config.Property.*;
 
 public class CloudFoundryConfig implements PackageMaterialConfiguration {
+    public static final String USERNAME_FIELD_NAME = "USERNAME";
+
+
     private static final Logger LOGGER = Logger.getLoggerFor(CloudFoundryConfig.class);
 
     public static final Property apiUrl = new PackageMaterialProperty("REPO_URL")
@@ -19,14 +22,15 @@ public class CloudFoundryConfig implements PackageMaterialConfiguration {
             .with(Property.REQUIRED, Boolean.TRUE)
             .with(DISPLAY_ORDER, 0);
 
-    public static final Property username = new PackageMaterialProperty("USERNAME")
+    public static final Property username = new PackageMaterialProperty(USERNAME_FIELD_NAME)
             .with(DISPLAY_NAME, "Username")
             .with(Property.REQUIRED, Boolean.TRUE)
             .with(DISPLAY_ORDER, 1);
 
     public static final Property password = new PackageMaterialProperty("PASSWORD")
             .with(DISPLAY_NAME, "Password")
-            .with(DISPLAY_ORDER, 2);
+            .with(DISPLAY_ORDER, 2)
+            .with(SECURE, Boolean.TRUE);
 
     public static final Property space = new PackageMaterialProperty("SPACE")
             .with(DISPLAY_NAME, "Space");
@@ -40,7 +44,7 @@ public class CloudFoundryConfig implements PackageMaterialConfiguration {
 
     @Override
     public RepositoryConfiguration getRepositoryConfiguration() {
-        LOGGER.info("getRepositoryConfiguration called.");
+        LOGGER.debug("getRepositoryConfiguration called.");
 
         RepositoryConfiguration repoConfig = new RepositoryConfiguration();
         repoConfig.add(apiUrl);
@@ -52,7 +56,7 @@ public class CloudFoundryConfig implements PackageMaterialConfiguration {
 
     @Override
     public PackageConfiguration getPackageConfiguration() {
-        LOGGER.info("getPackageConfiguration called.");
+        LOGGER.debug("getPackageConfiguration called.");
         PackageConfiguration packageConfig = new PackageConfiguration();
 
         packageConfig.add(space);
@@ -73,7 +77,7 @@ public class CloudFoundryConfig implements PackageMaterialConfiguration {
 
     @Override
     public ValidationResult isPackageConfigurationValid(PackageConfiguration packageConfiguration, RepositoryConfiguration repositoryConfiguration) {
-        LOGGER.info("isPackageConfigurationValid called.");
+        LOGGER.debug("isPackageConfigurationValid called.");
         // Not certain what to validate here.
         return new ValidationResult();
     }

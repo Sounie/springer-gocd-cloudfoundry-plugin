@@ -1,5 +1,6 @@
 package com.springer.gocd.cloudfoundry;
 
+import com.thoughtworks.go.plugin.api.config.Property;
 import com.thoughtworks.go.plugin.api.material.packagerepository.RepositoryConfiguration;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,6 +22,7 @@ public class CloudFoundryConfigTest {
         RepositoryConfiguration repositoryConfiguration = config.getRepositoryConfiguration();
 
         assertThat(repositoryConfiguration, is(notNullValue()));
-        assertThat(repositoryConfiguration.get("USERNAME"), is(notNullValue()));
+        assertThat(repositoryConfiguration.get(CloudFoundryConfig.USERNAME_FIELD_NAME).getOptions().hasOption(Property.SECURE), is(true));
+        assertThat(repositoryConfiguration.get(CloudFoundryConfig.USERNAME_FIELD_NAME), is(notNullValue()));
     }
 }
