@@ -25,9 +25,13 @@ There are two stages involved in making use of this Material:
 
 ## Version History
 1.0.0
+
 18 February 2015
+
 Original release.
 
 1.0.1
+
 22 February 2015
+
 Password property 'secure'.
