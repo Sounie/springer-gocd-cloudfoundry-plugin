@@ -24,14 +24,21 @@ There are two stages involved in making use of this Material:
      Select Define New and provide the details of your app.
 
 ## Version History
-1.0.0
+1.0.2
 
-18 February 2015
+23 February 2015
 
-Original release.
+Revision number parsing updated to support positive real numbers.
 
 1.0.1
 
 22 February 2015
 
 Password property 'secure'.
+
+1.0.0
+
+18 February 2015
+
+Original release.
+
