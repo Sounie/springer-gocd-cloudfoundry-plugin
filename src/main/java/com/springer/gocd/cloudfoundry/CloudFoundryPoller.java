@@ -47,7 +47,7 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
                                 new AppInstanceDetails(
                                     appName,
                                     instance.getSince(),
-                                    appName.replace(appNamePrefix, "").replaceAll("\\D", "")
+                                    RevisionNumberParser.parse(appNamePrefix, appName)
                                 )
                         );
                     }
