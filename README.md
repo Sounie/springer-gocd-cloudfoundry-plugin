@@ -1,7 +1,7 @@
 # springer-gocd-cloudfoundry-plugin
 Go plugin for monitoring app status in Cloud Foundry.
 
-Status: Version 1.0.2 released.
+Status: Version 1.0.2 released.  Binary distribution jar now available for each release.
 
 ## Requirements
 JDK 6 or higher.  Future versions may jump to 8+, but for now we'll stay aligned with Go CD.
