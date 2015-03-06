@@ -1,5 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'idea'
+apply plugin: "jacoco"
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
@@ -35,4 +36,11 @@ jar {
     }
 }
 
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "${buildDir}/jacocoHtml"
+    }
+}
 
