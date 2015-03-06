@@ -1,5 +1,5 @@
 # springer-gocd-cloudfoundry-plugin
-Go plugin for detecting application version in Cloud Foundry.
+Go plugin for detecting application version whenever the application is deployed into Cloud Foundry.
 
 Status: Version 1.0.2 released.  Binary distribution jar now available for each release.
 
@@ -27,6 +27,15 @@ There are two stages involved in making use of this Material:
      Add Package Repository - select Cloud Foundry as the type and provide the credentials for accessing your Cloud Foundry
   * During pipeline creation, specify Package as Material type and select the repository that you created in the previous step
      Select Define New and provide the details of your app.
+
+## About the name
+springer = I work for Springer Science+Business Media. Part of the development of this plugin started during a hack day there.
+
+gocd = The plugin runs inside the ThoughtWorks GoCD Continuous Delivery server.
+
+cloudfoundry = The platform that the plugin polls to detect updates to a deployed application.
+
+plugin = A self-contained module which runs inside an application.
 
 ## Version History
 1.0.2
