@@ -23,7 +23,7 @@ dependencies {
 
     compile 'com.google.code.gson:gson:2.3.1'
 
-    compile 'org.cloudfoundry:cloudfoundry-client-lib:1.1.0'
+    compile 'org.cloudfoundry:cloudfoundry-client-lib:1.1.1'
 
     testCompile 'junit:junit:4.11'
 
