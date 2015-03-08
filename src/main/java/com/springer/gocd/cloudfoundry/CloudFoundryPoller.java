@@ -10,7 +10,7 @@ import com.thoughtworks.go.plugin.api.response.execution.ExecutionResult;
 import org.cloudfoundry.client.lib.CloudCredentials;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.domain.CloudApplication;
-import org.cloudfoundry.client.lib.domain.InstanceInfo;
+
 import org.cloudfoundry.client.lib.domain.InstanceState;
 import org.cloudfoundry.client.lib.domain.InstancesInfo;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -64,19 +64,13 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
     }
 
     private void addRunningInstances(String appNamePrefix, List<AppInstanceDetails> instances, String appName, InstancesInfo applicationInstances) {
-        for (InstanceInfo instance : applicationInstances.getInstances()) {
-            if (instance.getState().equals(InstanceState.RUNNING)) {
-                LOGGER.debug("Added matching instance: " + instance);
-                // Assuming app name has version suffix
-                instances.add(
-                        new AppInstanceDetails(
-                            appName,
-                            instance.getSince(),
-                            RevisionNumberParser.parse(appNamePrefix, appName)
-                        )
-                );
-            }
-        }
+        applicationInstances.getInstances().stream()
+                .filter(instance -> instance.getState().equals(InstanceState.RUNNING))
+                .forEach(instance -> instances.add(new AppInstanceDetails(
+                        appName,
+                        instance.getSince(),
+                        RevisionNumberParser.parse(appNamePrefix, appName)
+                )));
     }
 
     @Override
