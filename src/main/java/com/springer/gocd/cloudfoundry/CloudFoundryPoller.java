@@ -26,7 +26,7 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
     public PackageRevision getLatestRevision(PackageConfiguration packageConfiguration, RepositoryConfiguration repositoryConfiguration) {
         final String appNamePrefix = packageConfiguration.get("APP_NAME").getValue();
 
-        LOGGER.info("getLatestRevision called, app name " + appNamePrefix);
+        LOGGER.debug("getLatestRevision called, app name " + appNamePrefix);
 
         CloudFoundryClient client = getClient(repositoryConfiguration);
 
@@ -39,19 +39,7 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
             InstancesInfo applicationInstances = client.getApplicationInstances(appName);
 
             if (applicationInstances != null) {
-                for (InstanceInfo instance : applicationInstances.getInstances()) {
-                    if (instance.getState().equals(InstanceState.RUNNING)) {
-                        LOGGER.info("instance: " + instance);
-                        // Assuming app name has version suffix
-                        instances.add(
-                                new AppInstanceDetails(
-                                    appName,
-                                    instance.getSince(),
-                                    RevisionNumberParser.parse(appNamePrefix, appName)
-                                )
-                        );
-                    }
-                }
+                addRunningInstances(appNamePrefix, instances, appName, applicationInstances);
             }
         }
 
@@ -75,15 +63,31 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
         }
     }
 
+    private void addRunningInstances(String appNamePrefix, List<AppInstanceDetails> instances, String appName, InstancesInfo applicationInstances) {
+        for (InstanceInfo instance : applicationInstances.getInstances()) {
+            if (instance.getState().equals(InstanceState.RUNNING)) {
+                LOGGER.debug("Added matching instance: " + instance);
+                // Assuming app name has version suffix
+                instances.add(
+                        new AppInstanceDetails(
+                            appName,
+                            instance.getSince(),
+                            RevisionNumberParser.parse(appNamePrefix, appName)
+                        )
+                );
+            }
+        }
+    }
+
     @Override
     public PackageRevision latestModificationSince(PackageConfiguration packageConfiguration,
                                                    RepositoryConfiguration repositoryConfiguration,
                                                    PackageRevision previouslyKnownRevision) {
-        LOGGER.info("latestModificationSince called with previous revision " + previouslyKnownRevision);
+        LOGGER.debug("latestModificationSince called with previous revision " + previouslyKnownRevision);
 
         PackageRevision latestRevision = getLatestRevision(packageConfiguration, repositoryConfiguration);
 
-        LOGGER.info("latestRevision: " + latestRevision);
+        LOGGER.debug("latestRevision: " + latestRevision);
 
         if (latestRevision.getTimestamp().after(previouslyKnownRevision.getTimestamp())) {
             return latestRevision;
@@ -94,7 +98,7 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
 
     @Override
     public Result checkConnectionToRepository(RepositoryConfiguration repositoryConfiguration) {
-        LOGGER.info("checkConnectionToRepository called");
+        LOGGER.debug("checkConnectionToRepository called");
 
         CloudFoundryClient client = getClient(repositoryConfiguration);
 
