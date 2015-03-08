@@ -21,8 +21,8 @@ public class CloudFoundryConfigTest {
     public void shouldGetRepositoryConfiguration() {
         RepositoryConfiguration repositoryConfiguration = config.getRepositoryConfiguration();
 
-        assertThat(repositoryConfiguration, is(notNullValue()));
-        assertThat(repositoryConfiguration.get(CloudFoundryConfig.USERNAME_FIELD_NAME).getOptions().hasOption(Property.SECURE), is(true));
-        assertThat(repositoryConfiguration.get(CloudFoundryConfig.USERNAME_FIELD_NAME), is(notNullValue()));
+        assertNotNull(repositoryConfiguration);
+        assertTrue(repositoryConfiguration.get(CloudFoundryConfig.USERNAME_FIELD_NAME).getOptions().hasOption(Property.SECURE));
+        assertNotNull(repositoryConfiguration.get(CloudFoundryConfig.USERNAME_FIELD_NAME));
     }
 }
