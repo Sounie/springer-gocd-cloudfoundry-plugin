@@ -9,7 +9,9 @@ Status: Version 1.0.2 released.  Binary distribution jar now available for each 
 * Performance testing - keep a record of the app over time without having to hook these tests into the application's build pipeline.
 
 ## Requirements
-JDK 6 or higher.  Future versions may jump to 8+, but for now we'll stay aligned with Go CD.
+Versions 1.0.0 - 1.0.2: Java 6 or higher.
+
+Version 2.0.0: Java 8.
 
 ## Building
 ./gradlew clean build
