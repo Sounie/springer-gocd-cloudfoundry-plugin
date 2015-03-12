@@ -1,7 +1,7 @@
 # springer-gocd-cloudfoundry-plugin
 Go plugin for detecting application version whenever the application is deployed into Cloud Foundry.
 
-Status: Version 1.0.2 released.  Binary distribution jar now available for each release.
+Status: Awarded first prize for ThoughtWorks Go Challenge, March 2015
 
 ## Potential use cases
 * Execution of tests that don't need to block a deploy.
