@@ -17,7 +17,7 @@ Version 2.0.0: Java 8.
 ./gradlew clean build
 
 ## Installing
-After building, copy the generated jar file from build/libs/springer-gocd-cloudfoundry-plugin-1.0.jar to your Go server's external plugins directory.
+After building, copy the generated jar file from build/libs/springer-gocd-cloudfoundry-plugin-2.0.1.jar to your Go server's external plugins directory.
 
 Restart Go server to allow it to detect and install the new plugin.
 
@@ -31,7 +31,7 @@ There are two stages involved in making use of this Material:
      Select Define New and provide the details of your app.
 
 ## About the name
-springer = I work for Springer Science+Business Media. Part of the development of this plugin started during a hack day there.
+springer = I worked for Springer Science+Business Media during the development of this plugin and started development during a hack day there.
 
 gocd = The plugin runs inside the ThoughtWorks GoCD Continuous Delivery server.
 
