@@ -40,7 +40,7 @@ cloudfoundry = The platform that the plugin polls to detect updates to a deploye
 plugin = A self-contained module which runs inside an application.
 
 ## Version History
-2.0.0
+**2.0.0**
 
 8 March 2015
 
@@ -48,19 +48,19 @@ Java 8 required.  This should make the plugin more appealing to developers who m
 
 Minor inconvenience - if your Go Server installation is using an older JVM then it should fail to load the plugin (but, let's face it, you want to upgrade).
 
-1.0.2
+**1.0.2**
 
 23 February 2015
 
 Revision number parsing updated to support positive real numbers.
 
-1.0.1
+**1.0.1**
 
 22 February 2015
 
 Password property 'secure'.
 
-1.0.0
+**1.0.0**
 
 18 February 2015
 
