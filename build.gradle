@@ -5,6 +5,9 @@ task wrapper(type: Wrapper) {
 apply plugin: 'java'
 apply plugin: 'idea'
 
+// Introduces dependencyUpdates task
+apply plugin: 'com.github.ben-manes.versions'
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 version = '2.0.1'
@@ -15,6 +18,10 @@ repositories {
 
 buildscript {
     repositories { mavenCentral() }
+
+    dependencies {
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.12.0'
+    }
 }
 
 configurations.all {
