@@ -1,1 +1,3 @@
+// Uncomment to try out the Kotlin version of the Gradle build
+//rootProject.buildFileName = 'build.gradle.kts'
 rootProject.name = 'springer-gocd-cloudfoundry-plugin'
