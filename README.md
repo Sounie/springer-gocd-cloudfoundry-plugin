@@ -30,6 +30,10 @@ There are two stages involved in making use of this Material:
   * During pipeline creation, specify Package as Material type and select the repository that you created in the previous step
      Select Define New and provide the details of your app.
 
+## GoCD version support
+According to the release notes for version 16.10.0 of GoCD, the API used by this plugin has been deprecated
+and will cease to be usable from version 17.1 - expected around January 2017.
+
 ## About the name
 springer = I worked for Springer Science+Business Media during the development of this plugin and started development during a hack day there.
 
