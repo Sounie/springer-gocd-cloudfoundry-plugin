@@ -30,7 +30,8 @@ configurations.all {
 }
 
 dependencies {
-    compile 'cd.go.plugin:go-plugin-api:14.4.0'
+    compile 'cd.go.plugin:go-plugin-api:16.12.0'
+    compile 'cd.go.plugin:gocd-package-material-plugin-shim:16.12.0'
 
     compile 'com.google.code.gson:gson:2.3.1'
 
@@ -75,6 +76,8 @@ dependencies {
 
 jar {
     into('lib') {
-        from configurations.runtime
+        from configurations.runtime {
+            exclude 'go-plugin-api*.jar'
+        }
     }
 }
