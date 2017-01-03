@@ -26,14 +26,10 @@
 <go-plugin id="CloudFoundry" version="1">
     <about>
         <name>Springer Cloud Foundry Plugin</name>
-        <version>2.0.1</version>
-        <target-go-version>14.4.0</target-go-version>
+        <version>3.0.0</version>
+        <target-go-version>16.2.0</target-go-version>
         <description>
             Material plugin that supports detection of CloudFoundry app updates.
         </description>
-        <vendor>
-            <name>Springer Science+Business Media</name>
-            <url>www.springer.com</url>
-        </vendor>
     </about>
 </go-plugin>

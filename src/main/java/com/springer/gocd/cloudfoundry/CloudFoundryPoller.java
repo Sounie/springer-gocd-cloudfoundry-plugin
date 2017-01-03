@@ -7,20 +7,25 @@ import com.thoughtworks.go.plugin.api.material.packagerepository.PackageRevision
 import com.thoughtworks.go.plugin.api.material.packagerepository.RepositoryConfiguration;
 import com.thoughtworks.go.plugin.api.response.Result;
 import com.thoughtworks.go.plugin.api.response.execution.ExecutionResult;
-import org.cloudfoundry.client.lib.CloudCredentials;
-import org.cloudfoundry.client.lib.CloudFoundryClient;
-import org.cloudfoundry.client.lib.domain.CloudApplication;
-
-import org.cloudfoundry.client.lib.domain.InstanceState;
-import org.cloudfoundry.client.lib.domain.InstancesInfo;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-
-import java.net.MalformedURLException;
-import java.net.URL;
+import org.cloudfoundry.client.CloudFoundryClient;
+import org.cloudfoundry.client.v2.applications.*;
+import org.cloudfoundry.client.v2.info.GetInfoRequest;
+import org.cloudfoundry.client.v2.info.GetInfoResponse;
+import org.cloudfoundry.reactor.ConnectionContext;
+import org.cloudfoundry.reactor.DefaultConnectionContext;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
+import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
+import reactor.core.publisher.Mono;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CloudFoundryPoller implements PackageMaterialPoller {
     private static final Logger LOGGER = Logger.getLoggerFor(CloudFoundryPoller.class);
+
+    private static final String DATE_FORMAT = "yyyy-MM-dd'T'hh:mm:ss";
 
     @Override
     public PackageRevision getLatestRevision(PackageConfiguration packageConfiguration, RepositoryConfiguration repositoryConfiguration) {
@@ -30,48 +35,9 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
 
         CloudFoundryClient client = getClient(repositoryConfiguration);
 
-        client.login();
-
-        List<String> appNames = lookupAppNames(client, appNamePrefix);
-
-        List<AppInstanceDetails> instances = new ArrayList<AppInstanceDetails>();
-        for (String appName : appNames) {
-            InstancesInfo applicationInstances = client.getApplicationInstances(appName);
-
-            if (applicationInstances != null) {
-                addRunningInstances(appNamePrefix, instances, appName, applicationInstances);
-            }
-        }
-
-        client.logout();
-
-        Collections.sort(instances, new Comparator<AppInstanceDetails>() {
-            @Override
-            public int compare(AppInstanceDetails i1, AppInstanceDetails i2) {
-                return i1.getSince().compareTo(i2.getSince());
-            }
-        });
-
-        if (instances.size() > 0) {
-            AppInstanceDetails instanceInfo = instances.iterator().next();
-
-            // FIXME: handling when no dates
-            return new PackageRevision(instanceInfo.getRevision(), instanceInfo.getSince(), "");
-        } else {
-            // TODO: what is suitable fallback?
-            return new PackageRevision("None found", new Date(), "");
-        }
+        return getLatestV2PackageRevision(client, appNamePrefix);
     }
 
-    private void addRunningInstances(String appNamePrefix, List<AppInstanceDetails> instances, String appName, InstancesInfo applicationInstances) {
-        applicationInstances.getInstances().stream()
-                .filter(instance -> instance.getState().equals(InstanceState.RUNNING))
-                .forEach(instance -> instances.add(new AppInstanceDetails(
-                        appName,
-                        instance.getSince(),
-                        RevisionNumberParser.parse(appNamePrefix, appName)
-                )));
-    }
 
     @Override
     public PackageRevision latestModificationSince(PackageConfiguration packageConfiguration,
@@ -86,7 +52,7 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
         if (latestRevision.getTimestamp().after(previouslyKnownRevision.getTimestamp())) {
             return latestRevision;
         } else {
-            return null;
+            return previouslyKnownRevision;
         }
     }
 
@@ -96,13 +62,11 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
 
         CloudFoundryClient client = getClient(repositoryConfiguration);
 
-        OAuth2AccessToken login = client.login();
-        client.logout();
-        if (login == null || login.getExpiration().before(new Date())) {
-            return ExecutionResult.failure("Invalid login");
-        }
+        GetInfoResponse response = client.info().get(GetInfoRequest.builder().build()).block(Duration.ofSeconds(5));
 
-        return ExecutionResult.success("Connected with supplied credentials.");
+        String apiVersion = response.getApiVersion();
+
+        return ExecutionResult.success("Connected with supplied credentials, apiVersion: " + apiVersion);
     }
 
     @Override
@@ -111,20 +75,11 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
 
         Result result = new Result();
 
-        OAuth2AccessToken login = client.login();
-
-        if (login == null || login.getExpiration().before(new Date())) {
-            LOGGER.warn("Invalid login");
-            result = ExecutionResult.failure("Invalid login");
-        } else {
-            final String appNamePrefix = packageConfiguration.get("APP_NAME").getValue();
+        final String appNamePrefix = packageConfiguration.get("APP_NAME").getValue();
             if (lookupAppNames(client, appNamePrefix).isEmpty()) {
                 LOGGER.warn("No app found");
                 result = ExecutionResult.failure("No such app found in CloudFoundry.");
             }
-        }
-
-        client.logout();
 
         return result;
     }
@@ -136,24 +91,87 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
 
         LOGGER.debug("Cloud Foundry connection details: api: " + api + ", username " + username);
 
-        try {
-            return new CloudFoundryClient(new CloudCredentials(username, password), new URL(api));
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("Invalid api URL", e);
-        }
+        ConnectionContext connectionContext = DefaultConnectionContext.builder()
+                .apiHost(api)
+                .skipSslValidation(true)
+                .build();
+
+        ReactorCloudFoundryClient client = ReactorCloudFoundryClient.builder()
+                .connectionContext(connectionContext)
+                .tokenProvider(PasswordGrantTokenProvider.builder()
+                        .username(username)
+                        .password(password)
+                        .build())
+                .build();
+
+        return client;
     }
 
-    private List<String> lookupAppNames(CloudFoundryClient client, String appName) {
-        List<CloudApplication> applications = client.getApplications();
-
-        // Assuming apps are deployed with the app name having a version appended
+    private List<String> lookupAppNames(CloudFoundryClient client, String appNamePrefix) {
         List<String> matchingApps = new ArrayList<String>();
-        for (CloudApplication application : applications) {
-            if (application.getName().startsWith(appName)) {
-                matchingApps.add(application.getName());
+
+        accumulateV2Apps(client, matchingApps);
+
+        return matchingApps.stream()
+                .filter(i -> i.startsWith(appNamePrefix))
+                .collect(Collectors.toList());
+    }
+
+    private PackageRevision getLatestV2PackageRevision(CloudFoundryClient client, String appNamePrefix) {
+        PackageRevision latestRevision = null;
+
+        ApplicationsV2 applicationsV2 = client.applicationsV2();
+
+        ListApplicationsRequest listApplicationsRequest = ListApplicationsRequest.builder()
+                .build();
+
+        Mono<ListApplicationsResponse> responseMono = applicationsV2.list(listApplicationsRequest);
+
+        try {
+            ListApplicationsResponse response = responseMono.block();
+
+            if (response.getTotalResults() > 0) {
+                ApplicationResource resource = response.getResources()
+                        .stream()
+                        .filter(i -> i.getEntity().getName().startsWith(appNamePrefix)
+                                && "STARTED".equals(i.getEntity().getState()))
+                        .sorted(Comparator.comparing(a -> a.getMetadata().getUpdatedAt()))
+                        .findFirst().get();
+
+                try {
+                    latestRevision = new PackageRevision(
+                            RevisionNumberParser.parse(appNamePrefix, resource.getEntity().getName()),
+                            new SimpleDateFormat(DATE_FORMAT).parse(resource.getMetadata().getUpdatedAt()),
+                            "");
+                } catch (ParseException e) {
+                    LOGGER.warn("Failed to parse date: " + resource.getMetadata().getUpdatedAt());
+                }
             }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to obtain revision.");
         }
 
-        return matchingApps;
+        return latestRevision;
+    }
+
+    private void accumulateV2Apps(CloudFoundryClient client, List<String> matchingApps) {
+        ApplicationsV2 applicationsV2 = client.applicationsV2();
+
+        ListApplicationsRequest listApplicationsRequest = ListApplicationsRequest.builder()
+                .build();
+
+        Mono<ListApplicationsResponse> responseMono = applicationsV2.list(listApplicationsRequest);
+
+        try {
+            ListApplicationsResponse response = responseMono.block();
+
+            if (response.getTotalResults() > 0) {
+                System.out.println(response.getTotalResults());
+                response.getResources().forEach(app ->
+                        matchingApps.add(app.getEntity().getName()));
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to lookup V2 apps.");
+        }
     }
 }
