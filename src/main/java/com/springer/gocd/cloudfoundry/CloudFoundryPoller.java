@@ -49,7 +49,9 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
 
         LOGGER.debug("latestRevision: " + latestRevision);
 
-        if (latestRevision.getTimestamp().after(previouslyKnownRevision.getTimestamp())) {
+        if (latestRevision != null &&
+                latestRevision.getTimestamp().after(previouslyKnownRevision.getTimestamp()))
+        {
             return latestRevision;
         } else {
             return previouslyKnownRevision;
