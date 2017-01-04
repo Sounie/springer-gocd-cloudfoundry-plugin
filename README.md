@@ -25,7 +25,7 @@ Version 3.0.0: GoCD 16.2.0 and CloudFoundry API 2.
 
 ## Installing
 After building, copy the generated jar file from 
-build/libs/springer-gocd-cloudfoundry-plugin-3.0.0.jar to your Go 
+build/libs/springer-gocd-cloudfoundry-plugin-3.0.1.jar to your Go 
 server's external plugins directory.
 
 Restart Go server to allow it to detect and install the new plugin.
@@ -63,9 +63,15 @@ a deployed application.
 plugin = A self-contained module which runs inside an application.
 
 ## Version History
+**3.0.1**
+
+4 January 2017
+
+Bug fix for ordering by app updated timestamp.
+
 **3.0.0**
 
-4 January 2016
+4 January 2017
 
 Initial attempt at support for CloudFoundry API version 2.
 
