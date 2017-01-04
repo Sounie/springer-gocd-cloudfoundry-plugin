@@ -18,12 +18,14 @@ Versions 1.0.0 - 1.0.2: Java 6 or higher.
 
 Version 2.0.0: Java 8.
 
+Version 3.0.0: GoCD 16.2.0 and CloudFoundry API 2.
+
 ## Building
 ./gradlew clean build
 
 ## Installing
 After building, copy the generated jar file from 
-build/libs/springer-gocd-cloudfoundry-plugin-2.0.1.jar to your Go 
+build/libs/springer-gocd-cloudfoundry-plugin-3.0.0.jar to your Go 
 server's external plugins directory.
 
 Restart Go server to allow it to detect and install the new plugin.
@@ -43,7 +45,9 @@ There are two stages involved in making use of this Material:
 ## GoCD version support
 According to the release notes for version 16.10.0 of GoCD, the API 
 used by this plugin has been deprecated and will cease to be usable 
-from version 17.1 - expected around January 2017.
+from version 17.1 - expected around January 2017.  Work is in 
+progress to either apply a shim around this, or utilise whatever API
+the GoCD 17 supports directly.
 
 ## About the name
 springer = I worked for Springer Science+Business Media during the
@@ -59,6 +63,12 @@ a deployed application.
 plugin = A self-contained module which runs inside an application.
 
 ## Version History
+**3.0.0**
+
+4 January 2016
+
+Initial attempt at support for CloudFoundry API version 2.
+
 **2.0.0**
 
 8 March 2015
