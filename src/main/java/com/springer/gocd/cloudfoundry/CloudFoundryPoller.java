@@ -35,7 +35,11 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
 
         CloudFoundryClient client = getClient(repositoryConfiguration);
 
-        return getLatestV2PackageRevision(client, appNamePrefix);
+        PackageRevision revision = getLatestV2PackageRevision(client, appNamePrefix);
+
+        LOGGER.debug("latest revision: " + revision);
+
+        return revision;
     }
 
 
@@ -47,11 +51,10 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
 
         PackageRevision latestRevision = getLatestRevision(packageConfiguration, repositoryConfiguration);
 
-        LOGGER.debug("latestRevision: " + latestRevision);
-
         if (latestRevision != null &&
                 latestRevision.getTimestamp().after(previouslyKnownRevision.getTimestamp()))
         {
+            LOGGER.info("Latest revision later than previous known.");
             return latestRevision;
         } else {
             return previouslyKnownRevision;
@@ -79,7 +82,7 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
 
         final String appNamePrefix = packageConfiguration.get("APP_NAME").getValue();
             if (lookupAppNames(client, appNamePrefix).isEmpty()) {
-                LOGGER.warn("No app found");
+                LOGGER.warn("No app found.");
                 result = ExecutionResult.failure("No such app found in CloudFoundry.");
             }
 
@@ -137,7 +140,16 @@ public class CloudFoundryPoller implements PackageMaterialPoller {
                         .stream()
                         .filter(i -> i.getEntity().getName().startsWith(appNamePrefix)
                                 && "STARTED".equals(i.getEntity().getState()))
-                        .sorted(Comparator.comparing(a -> a.getMetadata().getUpdatedAt()))
+                        .sorted(Comparator.comparing((ApplicationResource a) -> {
+                            try {
+                                return new SimpleDateFormat(DATE_FORMAT).parse(
+                                        a.getMetadata().getUpdatedAt());
+                            } catch (ParseException e) {
+                                // FIXME: not ideal exception handling
+                                LOGGER.warn("Failed to parse updated date.");
+                                return null;
+                            }
+                        }).reversed())
                         .findFirst().get();
 
                 try {
