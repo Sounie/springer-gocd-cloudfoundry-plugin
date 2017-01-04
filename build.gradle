@@ -93,7 +93,9 @@ dependencies {
 
 jar {
     into('lib') {
-        from configurations.runtime
+        from configurations.runtime {
+            exclude 'go-plugin-api*.jar'
+        }
     }
 }
 

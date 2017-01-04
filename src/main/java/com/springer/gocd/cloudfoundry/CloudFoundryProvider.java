@@ -5,7 +5,6 @@ import com.thoughtworks.go.plugin.api.material.packagerepository.PackageMaterial
 import com.thoughtworks.go.plugin.api.material.packagerepository.PackageMaterialPoller;
 import com.thoughtworks.go.plugin.api.material.packagerepository.PackageMaterialProvider;
 
-@Extension
 public class CloudFoundryProvider implements PackageMaterialProvider {
 
     @Override
