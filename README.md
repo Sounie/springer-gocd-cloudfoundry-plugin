@@ -63,6 +63,12 @@ a deployed application.
 plugin = A self-contained module which runs inside an application.
 
 ## Version History
+**3.1.1**
+
+4 January 2017
+
+Integrated change to allow plugin to continue to work with GoCD 17.1
+
 **3.0.1**
 
 4 January 2017
