@@ -34,6 +34,10 @@ Verify that the plugin has successfully been installed by navigating to
 the Admin / Plugins section on your Go server.
 
 ## Usage
+This plugin expects your application name within CloudFoundry to include
+an integer value as as suffix which represents the app version.
+
+## Setup
 There are two stages involved in making use of this Material:
   * Admin / Package Repositories
      Add Package Repository - select Cloud Foundry as the type and
