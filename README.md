@@ -35,7 +35,7 @@ the Admin / Plugins section on your Go server.
 
 ## Usage
 This plugin expects your application name within CloudFoundry to include
-an integer value as as suffix which represents the app version.
+an integer value as a suffix which represents the app version.
 
 ## Setup
 There are two stages involved in making use of this Material:
